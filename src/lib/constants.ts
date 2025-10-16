@@ -15,6 +15,7 @@ export const COUNTRIES: { code: string; name: string }[] = [
   { code: 'MY', name: 'Malaysia' },
   { code: 'JP', name: 'Japan' },
   { code: 'KR', name: 'South Korea' },
+  { code: 'PH', name: 'Philippines' }
 ];
 
 export const CATEGORIES: string[] = [
