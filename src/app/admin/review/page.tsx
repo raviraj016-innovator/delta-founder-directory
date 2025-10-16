@@ -30,7 +30,6 @@ export default function AdminReviewPage() {
       await reload();
     });
     return () => unsub();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const reload = async () => {

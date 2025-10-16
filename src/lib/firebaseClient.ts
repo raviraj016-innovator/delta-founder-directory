@@ -76,5 +76,6 @@ export async function isCurrentUserAdmin() {
   const u = auth.currentUser;
   if (!u) return false;
   const res = await getIdTokenResult(u, true);
-  return Boolean((res.claims as any).admin);
+  const claims = res.claims as Record<string, unknown>;
+  return Boolean(claims.admin);
 }

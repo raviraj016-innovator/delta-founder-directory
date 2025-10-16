@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { onAuthStateChanged } from "firebase/auth";
 import { createStartup } from "@/lib/firestore";
-import { slugify } from "@/lib/slug";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Stage } from "@/types";
 import { getFounder, ensureUniqueSlug } from "@/lib/firestore";
 import { CATEGORIES, COUNTRIES } from "@/lib/constants";
@@ -57,7 +57,7 @@ export default function NewStartupPage() {
       // Pull founder profile for denormalized public display on startup page
       const f = await getFounder(uid);
       const slug = await ensureUniqueSlug(name, uid);
-      const id = await createStartup({
+      await createStartup({
         name,
         oneLiner,
         description,
@@ -101,8 +101,8 @@ export default function NewStartupPage() {
           .filter(Boolean),
       });
       router.replace("/me/startups");
-    } catch (e: any) {
-      setErr(e?.message || "Failed to create startup");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Failed to create startup");
     } finally {
       setSaving(false);
     }
@@ -224,7 +224,7 @@ export default function NewStartupPage() {
         </div>
         <div className="flex items-center gap-3">
           <button disabled={saving} className="px-4 py-2 bg-black text-white rounded disabled:opacity-60">{saving?"Saving...":"Create"}</button>
-          <a href="/me/startups" className="text-sm underline">Cancel</a>
+          <Link href="/me/startups" className="text-sm underline">Cancel</Link>
         </div>
         {err && <p className="text-sm text-red-600">{err}</p>}
       </form>

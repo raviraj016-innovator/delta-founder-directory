@@ -34,9 +34,9 @@ export default function LoginPage() {
       setStatus("Sending sign-in link...");
       await startEmailLinkSignIn(email);
       setStatus("Sign-in link sent. Check your inbox/spam to complete sign in.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setStatus(err?.message || "Failed to send link");
+      setStatus(err instanceof Error ? err.message : "Failed to send link");
     }
   };
 
@@ -45,8 +45,8 @@ export default function LoginPage() {
       await signOut(getFirebaseAuth());
       setUserEmail(null);
       setStatus("Signed out");
-    } catch (e: any) {
-      setStatus(e?.message || "Failed to sign out");
+    } catch (e: unknown) {
+      setStatus(e instanceof Error ? e.message : "Failed to sign out");
     }
   };
 

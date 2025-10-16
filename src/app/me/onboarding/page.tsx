@@ -5,6 +5,7 @@ import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { onAuthStateChanged } from "firebase/auth";
 import { getFounder, upsertFounder, syncFounderToStartups } from "@/lib/firestore";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -59,8 +60,8 @@ export default function OnboardingPage() {
       // Keep founders displayed on startup pages in sync automatically
       await syncFounderToStartups(uid);
       router.replace("/me");
-    } catch (e: any) {
-      setErr(e?.message || "Failed to save");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Failed to save");
     } finally {
       setSaving(false);
     }
@@ -112,7 +113,7 @@ export default function OnboardingPage() {
         </div>
         <div className="flex items-center gap-3">
           <button disabled={saving} className="px-4 py-2 bg-black text-white rounded disabled:opacity-60">{saving?"Saving...":"Save profile"}</button>
-          <a href="/me" className="text-sm underline">Skip for now</a>
+          <Link href="/me" className="text-sm underline">Skip for now</Link>
         </div>
         {err && <p className="text-sm text-red-600">{err}</p>}
       </form>

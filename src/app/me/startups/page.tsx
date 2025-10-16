@@ -47,7 +47,7 @@ export default function MyStartupsPage() {
       {loading ? (
         <p>Loading...</p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-gray-600">No startups yet. Click "Add startup" to create your first.</p>
+        <p className="text-sm text-gray-600">No startups yet. Click &quot;Add startup&quot; to create your first.</p>
       ) : (
         <ul className="space-y-3">
           {items.map((s) => (

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { getFounder } from "@/lib/firestore";
 
 export default function MePage() {
@@ -37,30 +38,18 @@ export default function MePage() {
         <>
           <p className="text-sm text-gray-600">Signed in as {email}</p>
           <div className="flex gap-3 flex-wrap">
-            <a
-              href="/"
-              className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
-            >
+            <Link href="/" className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">
               Go to Directory
-            </a>
-            <a
-              href="/me/onboarding"
-              className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
-            >
+            </Link>
+            <Link href="/me/onboarding" className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">
               {needsOnboarding ? "Complete Onboarding" : "Edit Profile"}
-            </a>
-            <a
-              href="/me/startups"
-              className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
-            >
+            </Link>
+            <Link href="/me/startups" className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">
               My Startups
-            </a>
-            <a
-              href="/me/startups/new"
-              className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
-            >
+            </Link>
+            <Link href="/me/startups/new" className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200">
               Add Startup
-            </a>
+            </Link>
             <button
               onClick={handleSignOut}
               className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"

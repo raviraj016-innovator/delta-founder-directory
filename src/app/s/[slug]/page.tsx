@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { fetchStartupBySlug } from "@/lib/firestore";
 import { StartupDoc } from "@/types";
 
@@ -47,7 +48,7 @@ export default function StartupDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-4">
-      <a href="/" className="text-sm underline">← Back to Directory</a>
+      <Link href="/" className="text-sm underline">← Back to Directory</Link>
       <h1 className="text-3xl font-semibold break-words">{item.name}</h1>
       {item.recentSocialPostUrl && (
         <p className="text-sm mt-1">
@@ -117,7 +118,6 @@ export default function StartupDetailPage() {
           <h2 className="text-lg font-medium">Demo video</h2>
           <div className="aspect-video w-full max-w-3xl bg-black/5">
             {embedUrl ? (
-              // eslint-disable-next-line jsx-a11y/iframe-has-title
               <iframe
                 src={embedUrl}
                 className="w-full h-full rounded"

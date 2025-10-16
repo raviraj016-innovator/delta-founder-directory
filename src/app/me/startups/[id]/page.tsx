@@ -6,13 +6,13 @@ import { getFirebaseAuth } from "@/lib/firebaseClient";
 import { onAuthStateChanged } from "firebase/auth";
 import { fetchStartupById, updateStartup } from "@/lib/firestore";
 import { StartupDoc, Stage } from "@/types";
+import Link from "next/link";
 
 export default function EditStartupPage() {
   const router = useRouter();
   const params = useParams();
   const id = (params?.id as string) || "";
 
-  const [uid, setUid] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -33,8 +33,6 @@ export default function EditStartupPage() {
     const unsub = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.replace("/login");
-      } else {
-        setUid(user.uid);
       }
     });
     return () => unsub();
@@ -84,8 +82,8 @@ export default function EditStartupPage() {
           .filter(Boolean),
       });
       router.replace("/me/startups");
-    } catch (e: any) {
-      setErr(e?.message || "Failed to update startup");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Failed to update startup");
     } finally {
       setSaving(false);
     }
@@ -145,7 +143,7 @@ export default function EditStartupPage() {
         </div>
         <div className="flex items-center gap-3">
           <button disabled={saving} className="px-4 py-2 bg-black text-white rounded disabled:opacity-60">{saving?"Saving...":"Save"}</button>
-          <a href="/me/startups" className="text-sm underline">Cancel</a>
+          <Link href="/me/startups" className="text-sm underline">Cancel</Link>
         </div>
         {err && <p className="text-sm text-red-600">{err}</p>}
       </form>
