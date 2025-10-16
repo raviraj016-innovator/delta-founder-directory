@@ -1,0 +1,33 @@
+export const COUNTRIES: { code: string; name: string }[] = [
+  { code: 'US', name: 'United States' },
+  { code: 'IN', name: 'India' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ID', name: 'Indonesia' },
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'KR', name: 'South Korea' },
+];
+
+export const CATEGORIES: string[] = [
+  'AI/ML',
+  'Fintech',
+  'Healthcare',
+  'SaaS',
+  'Developer Tools',
+  'Consumer',
+  'Marketplace',
+  'EdTech',
+  'Climate',
+  'Hardware',
+  'Crypto/Web3',
+  'E-commerce',
+];

@@ -1,0 +1,57 @@
+rules_version='2'
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // founders profile: users can read/write only their own doc; admins full access
+    match /founders/{uid} {
+      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+    }
+
+    // startups collection
+    // Public can read only approved startups
+    // Owners (in ownerIds array) can read/write their startups, but cannot change `status`
+    // Only admins can set or change `status`
+    match /startups/{startupId} {
+      allow read: if resource.data.status == 'approved' || isAdmin() || (
+        isSignedIn() && (request.auth.uid in resource.data.ownerIds)
+      );
+
+      allow create: if isSignedIn() && (
+        // Ensure creator sets themselves as owner and status is pending
+        (request.auth.uid in request.resource.data.ownerIds) &&
+        request.resource.data.status == 'pending'
+      );
+
+      allow update: if isAdmin() || (
+        isSignedIn() && (request.auth.uid in resource.data.ownerIds) && (
+          // Owners can update anything except `status`
+          request.resource.data.diff(resource.data).changedKeys().hasOnly(['status']) == false &&
+          request.resource.data.status == resource.data.status
+        )
+      );
+
+      allow delete: if isAdmin() || (
+        isSignedIn() && (request.auth.uid in resource.data.ownerIds)
+      );
+    }
+
+    // tags: public read, admin write
+    match /tags/{tagId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // default deny for everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
