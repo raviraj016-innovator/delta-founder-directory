@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where, addDoc, DocumentData, CollectionReference, DocumentReference } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where, addDoc, DocumentData, CollectionReference, DocumentReference, runTransaction, arrayUnion } from 'firebase/firestore';
 import { getDb } from './firebaseClient';
 import { StartupDoc, FounderDoc, OwnerPublicInfo } from '@/types';
 import { slugify } from './slug';
@@ -168,4 +168,19 @@ export async function ensureUniqueSlug(baseName: string, uid: string) {
     if (snapApproved.empty && snapOwned.empty) return candidate;
     candidate = `${base}-${i++}`;
   }
+}
+
+export async function upvoteStartup(id: string, uid: string) {
+  const db = getDb();
+  const ref = doc(db, 'startups', id) as DocumentReference<StartupDoc>;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error('not-found');
+    const data = snap.data() as StartupDoc;
+    const currIds = Array.isArray(data.upvoterIds) ? data.upvoterIds : [];
+    if (currIds.includes(uid)) return;
+    const nextIds = arrayUnion(uid) as unknown as string[];
+    const nextCount = currIds.length + 1;
+    tx.update(ref, { upvoterIds: nextIds as unknown, upvotesCount: nextCount, updatedAt: Date.now() } as Partial<StartupDoc>);
+  });
 }

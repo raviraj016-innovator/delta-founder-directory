@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { fetchStartupBySlug } from "@/lib/firestore";
+import { fetchStartupBySlug, upvoteStartup } from "@/lib/firestore";
 import { StartupDoc } from "@/types";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
 
 export default function StartupDetailPage() {
   const params = useParams();
@@ -12,6 +13,8 @@ export default function StartupDetailPage() {
   const slug = (params?.slug as string) || "";
   const [item, setItem] = useState<StartupDoc | null>(null);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [currentUid, setCurrentUid] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -26,6 +29,14 @@ export default function StartupDetailPage() {
       setLoading(false);
     })();
   }, [slug, router]);
+
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    const u = auth.currentUser;
+    setCurrentUid(u?.uid || null);
+    const unsub = auth.onAuthStateChanged?.((user) => setCurrentUid(user?.uid || null));
+    return () => { unsub && unsub(); };
+  }, []);
 
   if (loading) return <div className="max-w-3xl mx-auto p-6">Loading...</div>;
   if (!item) return null;
@@ -49,7 +60,35 @@ export default function StartupDetailPage() {
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-4">
       <Link href="/" className="text-sm underline">← Back to Directory</Link>
-      <h1 className="text-3xl font-semibold break-words">{item.name}</h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-3xl font-semibold break-words">{item.name}</h1>
+        <button
+          onClick={async () => {
+            if (!item?.id) return;
+            const auth = getFirebaseAuth();
+            const uid = auth.currentUser?.uid;
+            if (!uid) {
+              alert("Please login to upvote");
+              return;
+            }
+            if (busy) return;
+            setBusy(true);
+            try {
+              await upvoteStartup(item.id, uid);
+              setItem((prev) => prev ? { ...prev, upvotesCount: (prev.upvotesCount || 0) + 1, upvoterIds: [...(prev.upvoterIds || []), uid] } : prev);
+            } catch (e) {
+              console.error(e);
+            } finally {
+              setBusy(false);
+            }
+          }}
+          className="text-sm px-3 py-1 rounded border bg-[var(--muted)] border-[var(--chip-border)] disabled:opacity-60"
+          disabled={busy || (currentUid ? (item.upvoterIds || []).includes(currentUid) : false)}
+          title="Upvote"
+        >
+          ▲ {item.upvotesCount || 0}
+        </button>
+      </div>
       {item.recentSocialPostUrl && (
         <p className="text-sm mt-1">
           <a

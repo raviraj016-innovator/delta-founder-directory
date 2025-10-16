@@ -52,6 +52,9 @@ export interface StartupDoc {
   recentSocialPostUrl?: string;
   careersUrl?: string;
   contactEmail?: string;
+  // Voting
+  upvotesCount?: number;
+  upvoterIds?: string[];
   createdAt: number;
   updatedAt: number;
 }

@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchApprovedStartups } from "@/lib/firestore";
+import { fetchApprovedStartups, upvoteStartup } from "@/lib/firestore";
 import { StartupDoc } from "@/types";
 import { CATEGORIES, COUNTRIES } from "@/lib/constants";
+import { getFirebaseAuth } from "@/lib/firebaseClient";
 
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
   const [stage, setStage] = useState<string>("");
   const [country, setCountry] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [currentUid, setCurrentUid] = useState<string | null>(null);
 
   useEffect(() => {
     const run = async () => {
@@ -25,11 +27,43 @@ export default function Home() {
         const matchCategory = category ? (x.categories || []).includes(category) : true;
         return matchStage && matchCountry && matchCategory;
       });
-      setItems(filtered);
+      const sorted = filtered.slice().sort((a, b) => (b.upvotesCount || 0) - (a.upvotesCount || 0));
+      setItems(sorted);
       setLoading(false);
     };
     run();
   }, [q, stage, country, category]);
+
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    const u = auth.currentUser;
+    setCurrentUid(u?.uid || null);
+    const unsub = auth.onAuthStateChanged?.((user) => setCurrentUid(user?.uid || null));
+    return () => { unsub && unsub(); };
+  }, []);
+
+  const handleUpvote = async (id: string | undefined) => {
+    if (!id) return;
+    const auth = getFirebaseAuth();
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      alert("Please login to upvote");
+      return;
+    }
+    try {
+      await upvoteStartup(id, uid);
+      setItems((prev) => {
+        const next = prev.map((s) =>
+          s.id === id
+            ? { ...s, upvotesCount: (s.upvotesCount || 0) + 1, upvoterIds: [...(s.upvoterIds || []), uid] }
+            : s
+        );
+        return next.slice().sort((a, b) => (b.upvotesCount || 0) - (a.upvotesCount || 0));
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -80,9 +114,19 @@ export default function Home() {
             <li key={s.id} className="border rounded p-4 bg-[var(--card)] text-[var(--foreground)]">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <Link href={`/s/${s.slug}`} className="font-medium hover:underline">
-                    {s.name}
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/s/${s.slug}`} className="font-medium hover:underline">
+                      {s.name}
+                    </Link>
+                    <button
+                      onClick={() => handleUpvote(s.id)}
+                      className="text-xs px-2 py-0.5 rounded border bg-[var(--muted)] border-[var(--chip-border)]"
+                      disabled={currentUid ? (s.upvoterIds || []).includes(currentUid) : false}
+                      title="Upvote"
+                    >
+                      ▲ {s.upvotesCount || 0}
+                    </button>
+                  </div>
                   <p
                     className="text-sm mt-1 overflow-hidden text-ellipsis break-words text-[var(--foreground)]/80"
                     style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
