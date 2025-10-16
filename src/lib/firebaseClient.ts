@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail, getIdTokenResult } from 'firebase/auth';
-import { Firestore, getFirestore, initializeFirestore, setLogLevel } from 'firebase/firestore';
+import { Firestore, getFirestore, initializeFirestore, setLogLevel, doc, getDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY as string,
@@ -78,4 +78,16 @@ export async function isCurrentUserAdmin() {
   const res = await getIdTokenResult(u, true);
   const claims = res.claims as Record<string, unknown>;
   return Boolean(claims.admin);
+}
+
+export async function isCurrentUserAdminDb() {
+  const auth = getFirebaseAuth();
+  const u = auth.currentUser;
+  if (!u) return false;
+  const db = getDb();
+  const ref = doc(db, 'admins', u.uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return false;
+  const data = snap.data() as { admin?: boolean } | undefined;
+  return data?.admin === undefined ? true : Boolean(data.admin);
 }

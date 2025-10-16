@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getFirebaseAuth, isCurrentUserAdmin } from "@/lib/firebaseClient";
+import { getFirebaseAuth, isCurrentUserAdminDb } from "@/lib/firebaseClient";
 import { onAuthStateChanged } from "firebase/auth";
 import { approveStartup, fetchPendingStartups, rejectStartup } from "@/lib/firestore";
 import { StartupDoc } from "@/types";
@@ -21,7 +21,7 @@ export default function AdminReviewPage() {
         router.replace("/login");
         return;
       }
-      const admin = await isCurrentUserAdmin();
+      const admin = await isCurrentUserAdminDb();
       setIsAdmin(admin);
       if (!admin) {
         router.replace("/");
