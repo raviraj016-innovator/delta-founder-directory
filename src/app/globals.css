@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --muted: #f5f5f5;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --chip-border: #e5e7eb;
 }
 
 @theme inline {
@@ -15,7 +19,11 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #ffffff;
+    --muted: #111214;
+    --card: #0f0f10;
+    --border: #3a3a3a;
+    --chip-border: rgba(255, 255, 255, 0.25);
   }
 }
 
@@ -24,3 +32,81 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+[data-theme="dark"] body { color: var(--foreground) !important; }
+
+[data-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+  --muted: #f5f5f5;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --chip-border: #e5e7eb;
+}
+
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --muted: #111214;
+  --card: #0f0f10;
+  --border: #3a3a3a;
+  --chip-border: rgba(255, 255, 255, 0.25);
+  color-scheme: dark;
+}
+
+/* Ensure readable text when components use Tailwind gray text utilities */
+[data-theme="dark"] .text-gray-800,
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-950,
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600,
+[data-theme="dark"] .text-gray-500 {
+  color: var(--foreground) !important;
+}
+
+[data-theme="dark"] .text-black { color: var(--foreground) !important; }
+
+[data-theme="dark"] a { color: var(--foreground); }
+
+/* Keep the Visit Website button light with dark text in dark mode */
+[data-theme="dark"] .visit-btn {
+  background-color: #f3f4f6 !important; /* gray-100 */
+  color: #111827 !important; /* gray-900 */
+  border-color: var(--chip-border) !important;
+}
+[data-theme="dark"] .visit-btn:hover {
+  background-color: #e5e7eb !important; /* gray-200 */
+}
+
+/* Common accent color fixes for dark mode */
+[data-theme="dark"] .text-blue-700 { color: var(--foreground) !important; }
+[data-theme="dark"] .text-green-700 { color: var(--foreground) !important; }
+[data-theme="dark"] .text-green-800 { color: var(--foreground) !important; }
+
+/* Light backgrounds to dark equivalents */
+[data-theme="dark"] .bg-gray-200 { background-color: #1f2937 !important; }
+[data-theme="dark"] .bg-gray-100 { background-color: #111827 !important; }
+[data-theme="dark"] .bg-blue-50 { background-color: #0b1220 !important; }
+[data-theme="dark"] .bg-green-100 { background-color: #052e1b !important; }
+[data-theme="dark"] .bg-white { background-color: var(--card) !important; }
+[data-theme="dark"] .bg-white\/80 { background-color: rgba(15, 15, 16, 0.8) !important; }
+
+/* Make chip/tag text white for light bg utility classes used as chips */
+[data-theme="dark"] .bg-blue-50,
+[data-theme="dark"] .bg-gray-100,
+[data-theme="dark"] .bg-green-100 {
+  color: var(--foreground) !important;
+}
+
+/* Borders in dark mode */
+[data-theme="dark"] .border { border-color: var(--border) !important; }
+
+/* Form controls */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+[data-theme="dark"] ::placeholder { color: #9CA3AF; }

@@ -145,7 +145,7 @@ export default function StartupDetailPage() {
           href={normalizeUrl(item.websiteUrl)}
           target="_blank"
           rel="noreferrer"
-          className="inline-block px-4 py-2 bg-black text-white rounded"
+          className="visit-btn inline-block px-4 py-2 rounded border bg-[var(--muted)] text-[color:rgb(17,17,17)] border-[var(--chip-border)]"
         >
           Visit website
         </a>

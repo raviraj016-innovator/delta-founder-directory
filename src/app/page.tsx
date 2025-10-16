@@ -77,14 +77,14 @@ export default function Home() {
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {items.map((s) => (
-            <li key={s.id} className="border rounded p-4 bg-white/80">
+            <li key={s.id} className="border rounded p-4 bg-[var(--card)] text-[var(--foreground)]">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <Link href={`/s/${s.slug}`} className="font-medium hover:underline">
                     {s.name}
                   </Link>
                   <p
-                    className="text-sm text-gray-600 mt-1 overflow-hidden text-ellipsis break-words"
+                    className="text-sm mt-1 overflow-hidden text-ellipsis break-words text-[var(--foreground)]/80"
                     style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
                     title={s.oneLiner}
                   >
@@ -92,14 +92,14 @@ export default function Home() {
                   </p>
                 </div>
                 {s.hiring && (
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Hiring</span>
+                  <span className="text-xs px-2 py-1 rounded bg-[var(--muted)] text-[var(--foreground)]/90 border border-[var(--chip-border)]">Hiring</span>
                 )}
               </div>
-              <div className="mt-2 text-xs text-gray-500 flex flex-wrap gap-3">
-                {s.stage && <span className="px-2 py-0.5 rounded bg-gray-100">{s.stage}</span>}
-                {s.countryCode && <span className="px-2 py-0.5 rounded bg-gray-100">{s.countryCode}</span>}
+              <div className="mt-2 text-xs flex flex-wrap gap-3 text-[var(--foreground)]/70">
+                {s.stage && <span className="px-2 py-0.5 rounded bg-[var(--muted)] border border-[var(--chip-border)]">{s.stage}</span>}
+                {s.countryCode && <span className="px-2 py-0.5 rounded bg-[var(--muted)] border border-[var(--chip-border)]">{s.countryCode}</span>}
                 {Array.isArray(s.categories) && s.categories.slice(0,3).map((c)=> (
-                  <span key={c} className="px-2 py-0.5 rounded bg-blue-50 text-blue-700">{c}</span>
+                  <span key={c} className="px-2 py-0.5 rounded bg-[var(--muted)] text-[var(--foreground)]/90 border border-[var(--chip-border)]">{c}</span>
                 ))}
               </div>
             </li>

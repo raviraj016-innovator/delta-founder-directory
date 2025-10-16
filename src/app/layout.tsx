@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,7 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var s=localStorage.getItem('theme');var t=s||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();",
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
@@ -41,14 +50,19 @@ export default function RootLayout({
         </header>
         <main className="flex-1">{children}</main>
         <footer className="mt-auto border-t">
-          <div className="max-w-6xl mx-auto px-4 py-6 text-sm text-gray-700 space-y-2">
-            <p>
-              built by <a href="https://www.linkedin.com/in/an-unknown-person" target="_blank" rel="noreferrer" className="underline">raviraj</a>
-            </p>
-            <p className="text-gray-600">
-              this site is neither affiliated with nor endorsed by delta (https://livetheresidency.com)
-            </p>
-            <p className="text-gray-600">built for fellow participants</p>
+          <div className="max-w-6xl mx-auto px-4 py-6 text-sm text-[var(--foreground)]/80">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-2">
+                <p>
+                  built by <a href="https://www.linkedin.com/in/an-unknown-person" target="_blank" rel="noreferrer" className="underline">raviraj</a>
+                </p>
+                <p className="opacity-80">
+                  this site is neither affiliated with nor endorsed by delta (https://livetheresidency.com)
+                </p>
+                <p className="opacity-80">built for fellow participants</p>
+              </div>
+              <ThemeToggle />
+            </div>
           </div>
         </footer>
       </body>
