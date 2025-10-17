@@ -6,6 +6,7 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import Script from "next/script";
 import Analytics from "@/components/Analytics";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
               "(function(){try{var s=localStorage.getItem('theme');var t=s||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();",
           }}
         />
+  
         {GA_ID && (
           <>
             <Script
@@ -59,6 +61,7 @@ export default function RootLayout({
       >
         <Suspense fallback={null}>
           <Analytics />
+          <VercelAnalytics />
         </Suspense>
         <header className="border-b">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
