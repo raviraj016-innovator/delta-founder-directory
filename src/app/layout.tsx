@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "delta directory",
+  title: "delta founders directory",
   description: "built by raviraj",
 };
 
@@ -62,7 +62,7 @@ export default function RootLayout({
         </Suspense>
         <header className="border-b">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <Link href="/" className="font-semibold">delta directory</Link>
+            <Link href="/" className="font-semibold">delta founders directory</Link>
             <nav className="flex items-center gap-4 text-sm">
               <Link href="/" className="hover:underline">Home</Link>
               <Link href="/me" className="hover:underline">My Account</Link>
@@ -83,6 +83,7 @@ export default function RootLayout({
                   this site is neither affiliated with nor endorsed by delta (https://livetheresidency.com)
                 </p>
                 <p className="opacity-80">built for fellow participants</p>
+                <p className="opacity-80"><a href="https://github.com/raviraj016-innovator/delta-founder-directory" target="_blank" rel="noreferrer" className="underline">source code</a></p>
               </div>
               <ThemeToggle />
             </div>

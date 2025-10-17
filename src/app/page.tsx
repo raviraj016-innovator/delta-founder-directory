@@ -67,13 +67,7 @@ export default function Home() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">delta directory</h1>
-        <nav className="flex gap-3 text-sm">
-          <Link href="/login" className="underline">Login</Link>
-          <Link href="/me" className="underline">My Account</Link>
-        </nav>
-      </header>
+    
 
       <div className="mb-4 flex flex-wrap md:flex-nowrap items-center gap-3">
         <input
