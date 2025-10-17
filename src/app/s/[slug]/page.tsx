@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchStartupBySlug, upvoteStartup } from "@/lib/firestore";
@@ -15,6 +15,8 @@ export default function StartupDetailPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [currentUid, setCurrentUid] = useState<string | null>(null);
+  const [isTwitter, setIsTwitter] = useState(false);
+  const twContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -37,6 +39,34 @@ export default function StartupDetailPage() {
     const unsub = auth.onAuthStateChanged?.((user) => setCurrentUid(user?.uid || null));
     return () => { unsub && unsub(); };
   }, []);
+  useEffect(() => {
+    const u = item?.demoVideoUrl || "";
+    const isTw = /(?:twitter\.com|x\.com)\//i.test(u);
+    setIsTwitter(isTw);
+    if (isTw) {
+      const existing = document.querySelector('script[src*="platform.twitter.com/widgets.js"]');
+      if (!existing) {
+        const s = document.createElement("script");
+        s.async = true;
+        s.src = "https://platform.twitter.com/widgets.js";
+        s.charset = "utf-8";
+        s.onload = () => {
+          // @ts-ignore
+          if (window.twttr && window.twttr.widgets) {
+            // @ts-ignore
+            window.twttr.widgets.load(twContainerRef.current || undefined);
+          }
+        };
+        document.body.appendChild(s);
+      } else {
+        // @ts-ignore
+        if (window.twttr && window.twttr.widgets) {
+          // @ts-ignore
+          window.twttr.widgets.load(twContainerRef.current || undefined);
+        }
+      }
+    }
+  }, [item?.demoVideoUrl]);
 
   if (loading) return <div className="max-w-3xl mx-auto p-6">Loading...</div>;
   if (!item) return null;
@@ -49,12 +79,27 @@ export default function StartupDetailPage() {
     // Vimeo
     const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
     if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
-    return url;
+    // TikTok standard URL: https://www.tiktok.com/@user/video/ID
+    const tiktok = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+    if (tiktok) return `https://www.tiktok.com/embed/v2/${tiktok[1]}`;
+    // Loom share -> embed
+    const loomShare = url.match(/loom\.com\/share\/([A-Za-z0-9_-]+)/);
+    if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}?hide_title=true&hide_owner=true&hide_share=true`;
+    // Loom embed already
+    const loomEmbed = url.match(/loom\.com\/embed\/([A-Za-z0-9_-]+)/);
+    if (loomEmbed) return url;
+    return null;
   };
   const embedUrl = toEmbedUrl(item.demoVideoUrl || "");
   const normalizeUrl = (url?: string) => {
     if (!url) return "";
     return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  };
+
+
+  const isHtml5Video = (url?: string) => {
+    if (!url) return false;
+    return /\.(mp4|webm|ogg)(?:$|[?#])/i.test(url);
   };
 
   return (
@@ -155,11 +200,22 @@ export default function StartupDetailPage() {
       {item.demoVideoUrl && (
         <section className="mt-6 space-y-2">
           <h2 className="text-lg font-medium">Demo video</h2>
-          <div className="aspect-video w-full max-w-3xl bg-black/5">
-            {embedUrl ? (
+          <div ref={twContainerRef} className={`${(isTwitter || (embedUrl && embedUrl.includes("tiktok.com/embed"))) ? "w-full max-w-3xl" : "aspect-video w-full max-w-3xl"} bg-black/5`}>
+            {isHtml5Video(item.demoVideoUrl) ? (
+              <video src={item.demoVideoUrl} controls className="w-full h-full rounded" />
+            ) : isTwitter ? (
+              <iframe
+                src={`https://twitframe.com/show?url=${encodeURIComponent(normalizeUrl(item.demoVideoUrl))}`}
+                className="w-full rounded"
+                title="X post"
+                style={{ minHeight: 350 }}
+                allow="clipboard-write"
+              />
+            ) : embedUrl ? (
               <iframe
                 src={embedUrl}
                 className="w-full h-full rounded"
+                title="Embedded video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
