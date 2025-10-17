@@ -39,7 +39,7 @@ export default function Home() {
     const u = auth.currentUser;
     setCurrentUid(u?.uid || null);
     const unsub = auth.onAuthStateChanged?.((user) => setCurrentUid(user?.uid || null));
-    return () => { unsub && unsub(); };
+    return () => { if (unsub) unsub(); };
   }, []);
 
   const handleUpvote = async (id: string | undefined) => {

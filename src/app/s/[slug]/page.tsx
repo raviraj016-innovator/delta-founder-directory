@@ -37,7 +37,7 @@ export default function StartupDetailPage() {
     const u = auth.currentUser;
     setCurrentUid(u?.uid || null);
     const unsub = auth.onAuthStateChanged?.((user) => setCurrentUid(user?.uid || null));
-    return () => { unsub && unsub(); };
+    return () => { if (unsub) unsub(); };
   }, []);
   useEffect(() => {
     const u = item?.demoVideoUrl || "";
@@ -51,17 +51,17 @@ export default function StartupDetailPage() {
         s.src = "https://platform.twitter.com/widgets.js";
         s.charset = "utf-8";
         s.onload = () => {
-          // @ts-ignore
+          // @ts-expect-error Twitter widgets types are not available on window
           if (window.twttr && window.twttr.widgets) {
-            // @ts-ignore
+            // @ts-expect-error Twitter widgets types are not available on window
             window.twttr.widgets.load(twContainerRef.current || undefined);
           }
         };
         document.body.appendChild(s);
       } else {
-        // @ts-ignore
+        // @ts-expect-error Twitter widgets types are not available on window
         if (window.twttr && window.twttr.widgets) {
-          // @ts-ignore
+          // @ts-expect-error Twitter widgets types are not available on window
           window.twttr.widgets.load(twContainerRef.current || undefined);
         }
       }
