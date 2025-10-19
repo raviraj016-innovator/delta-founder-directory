@@ -96,6 +96,11 @@ export default function Home() {
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
+        {!loading && (
+          <span className="text-sm text-[var(--foreground)]/70 whitespace-nowrap">
+            {items.length} startups
+          </span>
+        )}
       </div>
 
       {loading ? (
