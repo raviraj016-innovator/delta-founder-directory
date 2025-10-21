@@ -7,6 +7,15 @@ import { fetchStartupBySlug, upvoteStartup } from "@/lib/firestore";
 import { StartupDoc } from "@/types";
 import { getFirebaseAuth } from "@/lib/firebaseClient";
 
+type TwttrWindow = Window & {
+  twttr?: {
+    widgets?: {
+      createTweet?: (id: string, element: HTMLElement, options?: { align?: string }) => Promise<unknown>;
+      load?: (element?: HTMLElement) => void;
+    };
+  };
+};
+
 export default function StartupDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -41,30 +50,49 @@ export default function StartupDetailPage() {
   }, []);
   useEffect(() => {
     const u = item?.demoVideoUrl || "";
-    const isTw = /(?:twitter\.com|x\.com)\//i.test(u);
+    // Accept twitter.com, x.com, and subdomains like mobile.twitter.com
+    const isTw = /https?:\/\/(?:[^/]+\.)?(?:twitter\.com|x\.com)\//i.test(/^https?:\/\//i.test(u) ? u : `https://${u}`);
     setIsTwitter(isTw);
     if (isTw) {
-      const existing = document.querySelector('script[src*="platform.twitter.com/widgets.js"]');
-      if (!existing) {
-        const s = document.createElement("script");
-        s.async = true;
-        s.src = "https://platform.twitter.com/widgets.js";
-        s.charset = "utf-8";
-        s.onload = () => {
-          // @ts-expect-error Twitter widgets types are not available on window
-          if (window.twttr && window.twttr.widgets) {
-            // @ts-expect-error Twitter widgets types are not available on window
-            window.twttr.widgets.load(twContainerRef.current || undefined);
+      const getTweetId = (url: string) => {
+        // Matches .../status/12345 or .../status/12345?...
+        const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+        const m = normalized.match(/(?:[^/]+\.)?(?:twitter\.com|x\.com)\/[^/]+\/status(?:es)?\/(\d+)/i);
+        return m?.[1] || null;
+      };
+      const ensureWidgetsAndRender = () => {
+        const id = getTweetId(u);
+        const tw = (window as TwttrWindow).twttr;
+        if (tw && tw.widgets) {
+          if (id && tw.widgets.createTweet && twContainerRef.current) {
+            try {
+              twContainerRef.current.innerHTML = "";
+              tw.widgets.createTweet(id, twContainerRef.current, { align: "center" });
+            } catch {
+              if (tw && tw.widgets && typeof tw.widgets.load === "function") {
+                tw.widgets.load(twContainerRef.current || undefined);
+              }
+            }
+          } else if (twContainerRef.current) {
+            // Fallback: twitframe if ID not parseable
+            const url = /^https?:\/\//i.test(u) ? u : `https://${u}`;
+            twContainerRef.current.innerHTML = `<iframe src="https://twitframe.com/show?url=${encodeURIComponent(url)}" title="X post" style="width:100%;min-height:350px;border:0;" allow="clipboard-write"></iframe>`;
           }
-        };
-        document.body.appendChild(s);
-      } else {
-        // @ts-expect-error Twitter widgets types are not available on window
-        if (window.twttr && window.twttr.widgets) {
-          // @ts-expect-error Twitter widgets types are not available on window
-          window.twttr.widgets.load(twContainerRef.current || undefined);
+          return;
         }
-      }
+        // Load script if not present
+        const existing = document.querySelector('script[src*="platform.twitter.com/widgets.js"]');
+        if (!existing) {
+          const s = document.createElement("script");
+          s.async = true;
+          s.src = "https://platform.twitter.com/widgets.js";
+          s.charset = "utf-8";
+          s.onload = () => ensureWidgetsAndRender();
+          document.body.appendChild(s);
+        }
+      };
+      // Delay to ensure the blockquote is in the DOM before loading
+      setTimeout(ensureWidgetsAndRender, 0);
     }
   }, [item?.demoVideoUrl]);
 
@@ -200,17 +228,11 @@ export default function StartupDetailPage() {
       {item.demoVideoUrl && (
         <section className="mt-6 space-y-2">
           <h2 className="text-lg font-medium">Demo video</h2>
-          <div ref={twContainerRef} className={`${(isTwitter || (embedUrl && embedUrl.includes("tiktok.com/embed"))) ? "w-full max-w-3xl" : "aspect-video w-full max-w-3xl"} bg-black/5`}>
+          <div className={`${(isTwitter || (embedUrl && embedUrl.includes("tiktok.com/embed"))) ? "w-full max-w-3xl" : "aspect-video w-full max-w-3xl"} bg-black/5`}>
             {isHtml5Video(item.demoVideoUrl) ? (
               <video src={item.demoVideoUrl} controls className="w-full h-full rounded" />
             ) : isTwitter ? (
-              <iframe
-                src={`https://twitframe.com/show?url=${encodeURIComponent(normalizeUrl(item.demoVideoUrl))}`}
-                className="w-full rounded"
-                title="X post"
-                style={{ minHeight: 350 }}
-                allow="clipboard-write"
-              />
+              <div key={item.demoVideoUrl} ref={twContainerRef} style={{ minHeight: 350 }} className="w-full rounded" />
             ) : embedUrl ? (
               <iframe
                 src={embedUrl}
