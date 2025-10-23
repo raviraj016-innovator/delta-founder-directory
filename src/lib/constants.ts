@@ -20,6 +20,7 @@ export const COUNTRIES: { code: string; name: string }[] = [
   { code: 'RW', name: 'Rwanda' },
   { code: 'ZW', name: 'Zimbabwe' },
   { code: 'TR', name: 'Turkey' },
+  { code: 'CH', name: 'Switzerland'},
 ];
 
 export const CATEGORIES: string[] = [
